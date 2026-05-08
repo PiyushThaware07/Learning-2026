@@ -1,0 +1,34 @@
+# Create Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ns
+
+
+# Create Deployment
+apiVersion: apps/v1              # API version for Deployment resource
+kind: Deployment                # Defines this resource as a Deployment
+
+metadata:
+  name: mydeployment            # Name of the Deployment
+  namespace: dev-ns             # Namespace where this Deployment will run
+
+spec:
+  replicas: 3                   # Number of Pod replicas to maintain
+
+  selector:
+    matchLabels:
+      app: nginx-pod            # Selects Pods with this label (must match template labels)
+  
+  template:                     # Blueprint for creating Pods
+    metadata:
+      labels:
+        app: nginx-pod          # Label assigned to Pods (used by selector)
+    
+    spec:
+      containers:
+      - name: nginx-container   # Name of the container inside the Pod
+        image: nginx:latest     # Docker image to run (nginx web server)
+
+        ports:
+        - containerPort: 80     # Port exposed by the container

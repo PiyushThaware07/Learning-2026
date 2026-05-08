@@ -1,0 +1,38 @@
+# Create Namespace
+apiVersion: v1
+kind: Namespace
+
+metadata:
+  name: dev-ns                    # Namespace name
+
+---
+
+# Create StatefulSet
+apiVersion: apps/v1               # API version for StatefulSet resource
+kind: StatefulSet                 # Defines this resource as a StatefulSet
+
+metadata:
+  name: my-statefullset            # Name of the StatefulSet
+  namespace: dev-ns               # Namespace where StatefulSet will run
+
+spec:
+  serviceName: nginx-service      # Headless service used for stable network identity
+
+  replicas: 3                     # Number of Pod replicas
+
+  selector:
+    matchLabels:
+      app: nginx-pod              # StatefulSet manages Pods with this label
+
+  template:                       # Blueprint for creating Pods
+    metadata:
+      labels:
+        app: nginx-pod            # Label assigned to Pods
+
+    spec:
+      containers:
+      - name: nginx-container     # Name of the container inside the Pod
+        image: nginx:latest       # Docker image to run
+
+        ports:
+        - containerPort: 80       # Port exposed by the container

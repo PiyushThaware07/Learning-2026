@@ -1,0 +1,34 @@
+# Create Namespace
+apiVersion: v1
+kind: Namespace
+
+metadata:
+  name: dev-ns                    # Namespace name
+
+---
+
+# Create DaemonSet
+apiVersion: apps/v1               # API version for DaemonSet resource
+kind: DaemonSet                   # Defines this resource as a DaemonSet
+
+metadata:
+  name: my-daemonset              # Name of the DaemonSet
+  namespace: dev-ns               # Namespace where DaemonSet will run
+
+spec:
+  selector:
+    matchLabels:
+      app: nginx-pod              # DaemonSet manages Pods with this label
+
+  template:                       # Blueprint for creating Pods
+    metadata:
+      labels:
+        app: nginx-pod            # Label assigned to Pods
+
+    spec:
+      containers:
+      - name: nginx-container     # Name of the container inside the Pod
+        image: nginx:latest       # Docker image to run
+
+        ports:
+        - containerPort: 80       # Port exposed by the container

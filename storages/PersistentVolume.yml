@@ -1,0 +1,19 @@
+# Create PersistentVolume
+# A PersistentVolume (PV) provides persistent storage at the cluster level.
+# The data remains available even if the Pod gets deleted or restarted.
+
+apiVersion: v1
+kind: PersistentVolume
+
+metadata:
+  name: my-pv                      # PersistentVolume name
+
+spec:
+  capacity:
+    storage: 1Gi                   # Total storage size
+
+  accessModes:
+    - ReadWriteOnce                # Mount as read-write by a single node
+
+  hostPath:
+    path: /path/storage            # Local node storage path

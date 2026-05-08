@@ -1,0 +1,59 @@
+# Create ConfigMap
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: my-app-config                  # ConfigMap name
+
+data:
+  APP_PORT: "3000"                    # Application running port
+  APP_ENV: "production"               # Application environment
+  APP_NAME: "my-nodejs-app"           # Application name
+  APP_DEBUG: "false"                  # Enable/Disable debug mode
+
+---
+
+# Create Pod
+apiVersion: v1
+kind: Pod
+
+metadata:
+  name: nginx-pod                     # Pod name
+
+spec:
+  containers:
+  - name: nginx-container             # Container name
+    image: nginx:latest               # Nginx container image
+
+    ports:
+    - containerPort: 80               # Expose container port 80
+
+    env:                              # Inject ConfigMap values as environment variables
+
+    # Read APP_PORT from ConfigMap
+    - name: APP_PORT
+      valueFrom:
+        configMapKeyRef:
+          name: my-app-config         # ConfigMap name
+          key: APP_PORT               # Key inside ConfigMap
+
+    # Read APP_ENV from ConfigMap
+    - name: APP_ENV
+      valueFrom:
+        configMapKeyRef:
+          name: my-app-config
+          key: APP_ENV
+
+    # Read APP_NAME from ConfigMap
+    - name: APP_NAME
+      valueFrom:
+        configMapKeyRef:
+          name: my-app-config
+          key: APP_NAME
+
+    # Read APP_DEBUG from ConfigMap
+    - name: APP_DEBUG
+      valueFrom:
+        configMapKeyRef:
+          name: my-app-config
+          key: APP_DEBUG

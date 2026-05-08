@@ -1,0 +1,45 @@
+# Create Namespace
+apiVersion: v1
+kind: Namespace
+
+metadata:
+  name: dev-ns                         # Namespace name
+
+---
+
+# Create CronJob
+apiVersion: batch/v1
+kind: CronJob
+
+metadata:
+  name: my-cronjob                    # CronJob name
+  namespace: dev-ns                   # Run inside dev-ns namespace
+
+spec:
+
+  # Cron schedule format:
+  # ┌──────── Minute (0 - 59)
+  # │ ┌────── Hour (0 - 23)
+  # │ │ ┌──── Day of month (1 - 31)
+  # │ │ │ ┌── Month (1 - 12)
+  # │ │ │ │ ┌ Day of week (0 - 6)
+  # │ │ │ │ │
+  # * * * * *
+
+  schedule: "*/1 * * * *"             # Run every 1 minute
+
+  jobTemplate:                        # Template for the Job to create
+
+    spec:
+      template:
+
+        spec:
+          containers:
+
+          - name: test-container      # Container name
+            image: busybox            # Lightweight Linux image
+
+            # Wait 5 seconds then print message
+            command: ["/bin/sh", "-c", "sleep 5 && echo Hello CronJob"]
+
+          restartPolicy: Never        # Do not restart completed container

@@ -1,0 +1,30 @@
+# Create Namespace
+apiVersion: v1
+kind: Namespace
+
+metadata:
+  name: dev-ns                     # Namespace name
+
+---
+
+# Create Kubernetes Job
+apiVersion: batch/v1
+kind: Job
+
+metadata: 
+  name: my-job                     # Job name
+  namespace: dev-ns                # Run job inside dev-ns namespace
+
+spec:
+  template:                        # Pod template used by the Job
+
+    spec:
+      containers:
+
+      - name: test-container       # Container name
+        image: busybox             # Lightweight Linux image
+
+        # Wait for 10 seconds, then print message
+        command: ["/bin/sh", "-c", "sleep 10 && echo Hello Kubernetes Job"]
+
+      restartPolicy: Never         # Do not restart completed container

@@ -1,0 +1,104 @@
+# Create Namespace
+# Namespace is used to logically separate Kubernetes resources
+
+apiVersion: v1
+kind: Namespace
+
+metadata:
+  name: dev-ns                              # Namespace name
+
+
+---
+
+# Create StorageClass
+# StorageClass defines how storage should be dynamically provisioned
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+
+metadata:
+  name: manually-created-storage            # StorageClass name
+
+provisioner: kubernetes.io/no-provisioner   # Manual storage provisioning
+
+volumeBindingMode: WaitForFirstConsumer     # Wait until Pod uses PVC before binding
+
+
+---
+
+# Create PersistentVolume
+# PV provides actual persistent storage at cluster level
+
+apiVersion: v1
+kind: PersistentVolume
+
+metadata:
+  name: my-pv                               # PersistentVolume name
+
+spec:
+  capacity:
+    storage: 2Gi                            # Total storage capacity
+
+  accessModes:
+    - ReadWriteOnce                         # Read/write by single node
+
+  storageClassName: manually-created-storage
+  # Kubernetes binds only PV/PVC having same storageClassName
+
+  hostPath:
+    path: /path/storage                     # Local node storage path
+
+
+---
+
+# Create PersistentVolumeClaim
+# PVC requests/claims storage from the PV
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+
+metadata:
+  name: my-pvc                              # PVC name
+  namespace: dev-ns                         # PVC namespace
+
+spec:
+  accessModes:
+    - ReadWriteOnce                         # Must match PV access mode
+
+  storageClassName: manually-created-storage
+  # Must match PV storageClassName for successful binding
+
+  resources:
+    requests:
+      storage: 1Gi                          # Requested storage size
+
+
+---
+
+# Create Pod
+# Pod uses PVC to access persistent storage
+
+apiVersion: v1
+kind: Pod
+
+metadata:
+  name: nginx-pod                           # Pod name
+  namespace: dev-ns                         # Pod namespace
+
+spec:
+  containers:
+  - name: nginx-container                   # Container name
+    image: nginx:latest                     # Nginx image
+
+    ports:
+    - containerPort: 80                     # Expose container port
+
+    volumeMounts:
+    - name: my-volume                       # Volume name inside container
+      mountPath: /usr/share/nginx/html      # Mount storage path
+
+  volumes:
+  - name: my-volume                         # Volume definition
+
+    persistentVolumeClaim:
+      claimName: my-pvc                     # Attach PVC to Pod
