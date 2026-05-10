@@ -1,0 +1,63 @@
+# -----------------------------
+# Create Namespace
+# -----------------------------
+# Namespace is used to logically isolate resources in Kubernetes
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ns
+
+---
+
+# -----------------------------
+# Create Deployment
+# -----------------------------
+# Deployment manages Pods (replicas, updates, self-healing)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: newsify-deployment
+  namespace: dev-ns   # Deployment belongs to dev-ns namespace
+
+spec:
+  replicas: 1  # number of Pod copies (can scale if needed)
+
+  selector:
+    matchLabels:
+      app: newsify-pod  # Deployment uses this label to find its Pods
+
+  template:
+    metadata:
+      labels:
+        app: newsify-pod  # Label assigned to Pods created by Deployment
+
+    spec:
+      containers:
+      - name: newsify-container
+        image: piyushthaware07/newsify:v1  # Docker image to run
+
+        ports:
+        - containerPort: 8000  # Port where application runs inside container
+
+---
+
+# -----------------------------
+# Create Service
+# -----------------------------
+# Service provides stable networking for Pods (even if Pods restart)
+apiVersion: v1
+kind: Service
+metadata:
+  name: newsify-service
+  namespace: dev-ns  # Service is also inside dev-ns namespace
+
+spec:
+  selector:
+    app: newsify-pod  # Matches Pods created by Deployment
+
+  ports:
+  - protocol: TCP
+    port: 80          # Service port (what other apps use inside cluster)
+    targetPort: 8000  # Container port (actual app port inside Pod)
+
+  type: ClusterIP  # Internal-only access within Kubernetes cluster

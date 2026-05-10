@@ -1,0 +1,80 @@
+# =============================
+# Kubernetes Namespace
+# =============================
+# Namespace helps isolate all resources (Pods, Services, Deployments)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ns
+
+---
+# =============================
+# Deployment (Pod Controller)
+# =============================
+# Deployment ensures:
+# - Desired number of Pods are running
+# - Self-healing (recreates failed Pods)
+# - Rolling updates support
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: newsify-deployment
+  namespace: dev-ns
+  labels:
+    app: newsify-pod   # Label for identifying this deployment
+
+spec:
+  replicas: 1  # Number of Pod instances to run
+
+  selector:
+    # Tells Deployment which Pods it should manage
+    matchLabels:
+      app: newsify-pod
+
+  template:
+    metadata:
+      # Labels assigned to Pods created by this Deployment
+      # Must match selector above
+      labels:
+        app: newsify-pod
+
+    spec:
+      containers:
+        - name: newsify-container
+          # Docker image pulled from registry
+          image: piyushthaware07/newsify:v1
+
+          ports:
+            # Port exposed inside the container
+            - containerPort: 8000
+
+---
+# =============================
+# Service (Networking Layer)
+# =============================
+# Service provides stable access to Pods even if they restart
+# NodePort exposes app outside the Kubernetes cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: newsify-service
+  namespace: dev-ns
+
+spec:
+  type: NodePort  # Exposes service on each Node IP
+
+  selector:
+    # Routes traffic to Pods with this label
+    app: newsify-pod
+
+  ports:
+    - protocol: TCP
+
+      # Port exposed inside the cluster
+      port: 80
+
+      # Actual container port receiving traffic
+      targetPort: 8000
+
+      # External port on Node (accessible from browser/browser or curl)
+      nodePort: 30080
