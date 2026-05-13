@@ -1,0 +1,50 @@
+apiVersion: v1                     # Kubernetes API version
+kind: Namespace                    # Resource type = Namespace
+
+metadata:
+  name: dev-ns                     # Namespace name
+
+---
+
+apiVersion: v1                     # Kubernetes API version
+kind: Pod                          # Resource type = Pod
+
+metadata:
+  name: node-app-pod               # Pod name
+  namespace: dev-ns                # Pod will be created inside dev-ns namespace
+
+  labels:
+    app: node-app-pod              # Label used by Service selector
+
+spec:
+  containers:
+    - name: node-app-container     # Container name
+
+      image: piyushthaware07/node-app:v1   # Docker image
+
+      ports:
+        - containerPort: 3000      # Application runs on port 3000
+
+      env:
+        - name: PORT               # Environment variable name
+          value: "3000"            # Environment variable value
+
+---
+
+apiVersion: v1                     # Kubernetes API version
+kind: Service                      # Resource type = Service
+
+metadata:
+  name: node-app-service           # Service name
+  namespace: dev-ns                # Service namespace
+
+spec:
+  selector:
+    app: node-app-pod              # Select Pods having this label
+
+  ports:
+    - protocol: TCP                # Network protocol
+      port: 80                     # Service exposed on port 80
+      targetPort: 3000             # Forward traffic to container port 3000
+
+  type: ClusterIP                  # Internal Kubernetes service
