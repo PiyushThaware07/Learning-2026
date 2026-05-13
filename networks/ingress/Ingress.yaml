@@ -1,0 +1,153 @@
+# Create Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ns
+
+---
+
+# Create MongoDB Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mongodb-pod
+  namespace: dev-ns
+  labels:
+    app: mongodb
+spec:
+  containers:
+    - name: mongodb-container
+      image: mongo:7
+      ports:
+        - containerPort: 27017
+
+---
+
+# MongoDB Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: dev-ns
+spec:
+  type: ClusterIP
+  selector:
+    app: mongodb
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+
+---
+
+# Backend Server Pod (FIXED)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: todos-server-pod
+  namespace: dev-ns
+  labels:
+    app: todos-server
+spec:
+  containers:
+    - name: todos-server-container
+      image: piyushthaware07/todo-server:latest
+
+      # FIX: stop nodemon, use production start
+      command: ["npm"]
+      args: ["start"]
+
+      ports:
+        - containerPort: 8000
+
+      env:
+        - name: PORT
+          value: "8000"
+        - name: MONGO_URI
+          value: "mongodb://mongodb:27017/todo-app"
+
+---
+
+# Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: todos-server-service
+  namespace: dev-ns
+spec:
+  type: ClusterIP
+  selector:
+    app: todos-server
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+
+---
+
+# Frontend Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: todos-client-pod
+  namespace: dev-ns
+  labels:
+    app: todos-client
+spec:
+  containers:
+    - name: todos-client-container
+      image: piyushthaware07/todo-client:latest
+      ports:
+        - containerPort: 5173
+      env:
+        - name: VITE_API_URL
+          value: "http://13.201.119.235/"
+      command: ["sh", "-c"]
+      args: ["npm install -g serve && npm run build && serve -s dist -l 5173"]
+---
+
+# Frontend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: todos-client-service
+  namespace: dev-ns
+spec:
+  type: ClusterIP
+  selector:
+    app: todos-client
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5173
+
+---
+
+# Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: todos-ingress
+  namespace: dev-ns
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          # Backend API
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: todos-server-service
+                port:
+                  number: 80
+
+          # Frontend
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: todos-client-service
+                port:
+                  number: 80
