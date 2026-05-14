@@ -1,0 +1,73 @@
+# Namespace for all resources
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ns
+---
+# MongoDB Pod (simulated using nginx) - target of NetworkPolicy
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mongodb-pod
+  namespace: dev-ns
+  labels:
+    app: mongodb   # label used by NetworkPolicy to select this pod
+spec:
+  containers:
+    - name: mongodb-container
+      image: nginx:latest   # placeholder image (not real MongoDB)
+      ports:
+        - containerPort: 80
+---
+# NodeJS Pod (simulated using nginx) - allowed source in NetworkPolicy
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nodejs-pod
+  namespace: dev-ns
+  labels:
+    app: nodejs   # this label allows access to mongodb-pod
+spec:
+  containers:
+    - name: nodejs-container
+      image: nginx:latest
+      ports:
+        - containerPort: 80
+---
+# React Pod (simulated using nginx) - should be blocked by NetworkPolicy
+apiVersion: v1
+kind: Pod
+metadata:
+  name: react-pod
+  namespace: dev-ns
+  labels:
+    app: react   # not included in NetworkPolicy allow list
+spec:
+  containers:
+    - name: react-container
+      image: nginx:latest
+      ports:
+        - containerPort: 80
+---
+# NetworkPolicy: controls ingress traffic to MongoDB pod
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-nodejs-to-mongodb
+  namespace: dev-ns
+spec:
+  podSelector:
+    matchLabels:
+      app: mongodb   # apply policy only to mongodb pods
+
+  policyTypes:
+    - Ingress   # only controlling incoming traffic
+
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: nodejs   # only nodejs pods are allowed to connect
+      ports:
+        - protocol: TCP
+          port: 80   # allowed port for communication
