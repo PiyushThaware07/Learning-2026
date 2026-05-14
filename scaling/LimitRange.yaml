@@ -1,0 +1,49 @@
+# Namespace: isolated environment for testing
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ns
+
+---
+# LimitRange: defines min, max, and default CPU/memory per container
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: dev-limitrange
+  namespace: dev-ns
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: "200m"        # default CPU limit if not provided
+        memory: "256Mi"    # default memory limit if not provided
+      defaultRequest:
+        cpu: "100m"        # default CPU request for scheduling
+        memory: "128Mi"    # default memory request for scheduling
+      min:
+        cpu: "50m"         # minimum allowed CPU
+        memory: "64Mi"     # minimum allowed memory
+      max:
+        cpu: "1"           # maximum allowed CPU
+        memory: "1Gi"      # maximum allowed memory
+
+---
+# POD: used to test LimitRange behavior directly
+apiVersion: v1
+kind: Pod
+metadata:
+  name: limitrange-test-pod
+  namespace: dev-ns
+spec:
+  containers:
+    - name: nginx-container
+      image: nginx:latest
+      ports:
+        - containerPort: 80
+      resources:
+        requests:
+          cpu: "150m"        # scheduling request (must be >= LimitRange min)
+          memory: "128Mi"
+        limits:
+          cpu: "500m"        # runtime CPU limit (must be <= LimitRange max)
+          memory: "512Mi"    # runtime memory limit (must be <= LimitRange max)

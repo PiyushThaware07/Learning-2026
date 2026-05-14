@@ -1,0 +1,41 @@
+# Namespace: creates an isolated environment for all resources
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ns   # name of the namespace
+
+---
+# Deployment: manages a set of identical nginx pods
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment   # deployment name
+  namespace: dev-ns        # deployment runs inside dev-ns namespace
+spec:
+  replicas: 5              # desired number of pods (5 requested)
+  selector:
+    matchLabels:
+      app: nginx-pod      # selector used to match pods created by this deployment
+
+  template:
+    metadata:
+      labels:
+        app: nginx-pod    # label applied to each pod
+
+    spec:
+      containers:
+        - name: nginx-container     # container name inside pod
+          image: nginx:latest       # container image
+          ports:
+            - containerPort: 80     # container listens on port 80
+
+---
+# ResourceQuota: limits total resource usage in the namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: dev-quota        # quota name
+  namespace: dev-ns      # applied to dev-ns namespace
+spec:
+  hard:
+    pods: "3"            # maximum number of pods allowed in this namespace
