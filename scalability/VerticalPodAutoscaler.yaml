@@ -1,0 +1,98 @@
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ns
+
+---
+
+# NGINX Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: dev-ns
+
+spec:
+  replicas: 3 # Initial number of Pods
+
+  selector:
+    matchLabels:
+      app: nginx-pod
+
+  template:
+    metadata:
+      labels:
+        app: nginx-pod
+
+    spec:
+      containers:
+        - name: nginx-container
+          image: nginx:latest
+
+          ports:
+            - containerPort: 80 # Expose container on port 80
+
+          # Resource requests and limits required for VPA/HPA
+          resources:
+            requests:
+              cpu: "100m" # Minimum CPU guaranteed
+              memory: "128Mi" # Minimum memory guaranteed
+
+            limits:
+              cpu: "200m" # Maximum CPU allowed
+              memory: "256Mi" # Maximum memory allowed
+
+---
+
+# ClusterIP Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: dev-ns
+
+spec:
+  type: ClusterIP # Internal service inside cluster
+
+  selector:
+    app: nginx-pod
+
+  ports:
+    - port: 80 # Service port
+      targetPort: 80 # Container port
+      protocol: TCP # Communication protocol
+
+---
+
+# Vertical Pod Autoscaler (VPA)
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: nginx-vpa
+  namespace: dev-ns
+
+spec:
+  targetRef:
+    apiVersion: apps/v1 # Target API version
+    kind: Deployment # Target resource type
+    name: nginx-deployment # Deployment monitored by VPA
+
+  updatePolicy:
+    updateMode: "Recreate" # Restart Pods to apply new resource values
+
+  resourcePolicy:
+    containerPolicies:
+      - containerName: nginx-container # Container managed by VPA
+
+        minAllowed: # Minimum resources VPA can recommend
+          cpu: "100m" # Minimum CPU limit
+          memory: "128Mi" # Minimum memory limit
+
+        maxAllowed: # Maximum resources VPA can recommend
+          cpu: "500m" # Maximum CPU limit
+          memory: "512Mi" # Maximum memory limit
+
+        controlledResources:
+          - cpu # VPA controls CPU recommendations
+          - memory # VPA controls memory recommendations

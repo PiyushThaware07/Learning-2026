@@ -1,0 +1,32 @@
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ns
+
+---
+
+# Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  namespace: dev-ns
+
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: env # Node label key
+                operator: In # Match values inside list
+                values:
+                  - prod # Required node label value
+
+  containers:
+    - name: nginx-container
+      image: nginx:latest
+
+      ports:
+        - containerPort: 80
