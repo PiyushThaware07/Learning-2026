@@ -1,0 +1,60 @@
+# Namespace for isolating resources
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ns
+
+---
+
+# NGINX Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  namespace: dev-ns
+
+spec:
+  containers:
+    - name: nginx-container
+      image: nginx:latest
+
+      ports:
+        - containerPort: 80 # Expose container on port 80
+
+      # Checks whether container is alive
+      # Failed probe restarts the container
+      livenessProbe:
+        httpGet:
+          path: / # Send HTTP request to "/"
+          port: 80 # Check on port 80
+
+        initialDelaySeconds: 7 # Wait before first liveness check
+        periodSeconds: 4 # Run check every 4 seconds
+        timeoutSeconds: 3 # Fail probe after 3 seconds timeout
+        failureThreshold: 5 # Restart container after 5 failed checks
+
+      # Checks whether app can receive traffic
+      # Failed probe marks Pod as NotReady
+      readinessProbe:
+        httpGet:
+          path: / # Send HTTP request to "/"
+          port: 80 # Check readiness on port 80
+
+        initialDelaySeconds: 7 # Wait before first readiness check
+        periodSeconds: 5 # Run check every 5 seconds
+        timeoutSeconds: 5 # Fail probe after 5 seconds timeout
+        failureThreshold: 5 # Mark pod unready after 5 failures
+
+      # Checks whether application finished starting
+      # Until startup probe succeeds:
+      # - liveness probe is disabled
+      # - readiness probe is disabled
+      startupProbe:
+        httpGet:
+          path: / # Send HTTP request to "/"
+          port: 80 # Check startup on port 80
+
+        initialDelaySeconds: 5 # Wait before first startup check
+        periodSeconds: 5 # Run startup check every 5 seconds
+        timeoutSeconds: 3 # Fail probe after 3 seconds timeout
+        failureThreshold: 10 # Give app enough time to start

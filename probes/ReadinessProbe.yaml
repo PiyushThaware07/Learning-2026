@@ -1,0 +1,32 @@
+# Namespace for isolating resources
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ns
+
+---
+
+# NGINX Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  namespace: dev-ns
+
+spec:
+  containers:
+    - name: nginx-container
+      image: nginx:latest
+
+      ports:
+        - containerPort: 80 # Expose container on port 80
+
+      readinessProbe:
+        httpGet:
+          path: / # Send HTTP request to "/"
+          port: 80 # Check readiness on port 80
+
+        initialDelaySeconds: 5 # Wait before first readiness check
+        periodSeconds: 4 # Run readiness check every 4 seconds
+        timeoutSeconds: 3 # Probe timeout after 3 seconds
+        failureThreshold: 4 # Mark pod unready after 4 failures
