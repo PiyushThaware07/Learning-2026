@@ -1,0 +1,96 @@
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ns
+
+---
+
+# NGINX Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: dev-ns
+
+spec:
+  replicas: 3 # Initial number of Pods
+
+  selector:
+    matchLabels:
+      app: nginx-pod
+
+  template:
+    metadata:
+      labels:
+        app: nginx-pod
+
+    spec:
+      containers:
+        - name: nginx-container
+          image: nginx:latest
+
+          ports:
+            - containerPort: 80 # Expose container on port 80
+
+          # Resource requests and limits required for HPA
+          resources:
+            requests:
+              cpu: "100m" # Minimum CPU guaranteed
+              memory: "128Mi" # Minimum memory guaranteed
+
+            limits:
+              cpu: "200m" # Maximum CPU allowed
+              memory: "256Mi" # Maximum memory allowed
+
+---
+
+# ClusterIP Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: dev-ns
+
+spec:
+  type: ClusterIP # Internal service inside cluster
+
+  selector:
+    app: nginx-pod
+
+  ports:
+    - port: 80 # Service port
+      targetPort: 80 # Container port
+
+---
+
+# Horizontal Pod Autoscaler (HPA)
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: nginx-hpa
+  namespace: dev-ns
+
+spec:
+  # Target Deployment to scale
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nginx-deployment
+
+  minReplicas: 1 # Minimum number of Pods
+  maxReplicas: 5 # Maximum number of Pods
+
+  # Metrics used for scaling
+  metrics:
+    - type: Resource
+
+      resource:
+        name: cpu # Scale based on CPU usage
+
+        target:
+          type: Utilization
+
+          # Target average CPU utilization
+          # HPA scales Pods if CPU goes above 50%
+          averageUtilization: 50
