@@ -1,0 +1,39 @@
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ns
+
+---
+
+# DaemonSet
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nginx-daemonset
+  namespace: dev-ns
+
+spec:
+  selector:
+    matchLabels:
+      app: nginx-pod
+
+  template:
+    metadata:
+      labels:
+        app: nginx-pod
+
+    spec:
+      # Toleration allows Pod to run on tainted nodes
+      tolerations:
+        - key: "app" # Taint key
+          operator: "Equal" # Match exact key/value
+          value: "prod" # Taint value
+          effect: "NoSchedule" # Match NoSchedule taint effect
+
+      containers:
+        - name: nginx-container
+          image: nginx:latest
+
+          ports:
+            - containerPort: 80 # Expose container on port 80
