@@ -1,0 +1,14 @@
+apiVersion: mycompany.com/v1
+kind: Database
+metadata:
+  name: my-db
+
+spec:
+  engine: mysql
+  version: "8"
+  replicas: 3
+
+  backup:
+    enabled: true
+    schedule: "0 2 * * *"
+    retentionDays: 7
