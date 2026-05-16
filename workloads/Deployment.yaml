@@ -4,6 +4,7 @@ kind: Namespace
 metadata:
   name: dev-ns
 
+---
 
 # Create Deployment
 apiVersion: apps/v1              # API version for Deployment resource
