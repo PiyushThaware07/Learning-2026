@@ -1,0 +1,45 @@
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ns
+
+---
+
+# Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  namespace: dev-ns
+
+spec:
+
+  # Init Container (runs before main container)
+  initContainers:
+    - name: init-config
+      image: busybox
+      command:
+        - sh
+        - -c
+        - echo "Init container executed successfully" > /work-dir/status.txt
+
+      volumeMounts:
+        - name: workdir
+          mountPath: /work-dir
+
+  # Main Application Container
+  containers:
+    - name: nginx-container
+      image: nginx:latest
+      ports:
+        - containerPort: 80
+
+      volumeMounts:
+        - name: workdir
+          mountPath: /usr/share/nginx/html
+
+  # Shared Volume between init and main container
+  volumes:
+    - name: workdir
+      emptyDir: {}

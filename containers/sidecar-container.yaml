@@ -1,0 +1,42 @@
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ns
+
+---
+
+# Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  namespace: dev-ns
+
+spec:
+
+  containers:
+
+    # Main Application Container
+    - name: nginx-container
+      image: nginx:latest
+      ports:
+        - containerPort: 80
+      volumeMounts:
+        - name: workdir
+          mountPath: /usr/share/nginx/html
+
+    # Sidecar Container (writes logs to file)
+    - name: sidecar-container
+      image: busybox
+      command:
+        - sh
+        - -c
+        - while true; do echo "sidecar running" >> /workdir/sidecar.log; sleep 5; done
+      volumeMounts:
+        - name: workdir
+          mountPath: /workdir
+
+  volumes:
+    - name: workdir
+      emptyDir: {}
