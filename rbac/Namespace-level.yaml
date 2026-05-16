@@ -1,0 +1,47 @@
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ns # Namespace name
+
+---
+
+# Service Account --> Identity used by Pods to communicate with Kubernetes API
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dev-service-account # ServiceAccount name
+  namespace: dev-ns # ServiceAccount belongs to dev-ns namespace
+
+---
+
+# Role --> Used to define permissions inside a namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader # Role name
+  namespace: dev-ns # Role applies only inside dev-ns namespace
+
+rules:
+  - apiGroups: [""] # "" means core Kubernetes API group
+    resources: ["pods"] # Resource type this Role can access
+    verbs: ["get","list"] # Allowed actions on Pods
+
+---
+
+# RoleBinding --> Connects the ServiceAccount with the Role
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pod-reader-binding # RoleBinding name
+  namespace: dev-ns # RoleBinding exists inside dev-ns namespace
+
+subjects:
+  - kind: ServiceAccount # Type of subject being granted permissions
+    name: dev-service-account # ServiceAccount receiving permissions
+    namespace: dev-ns # Namespace where ServiceAccount exists
+
+roleRef:
+  kind: Role # Refers to a Role resource
+  name: pod-reader # Role being assigned to the ServiceAccount
+  apiGroup: rbac.authorization.k8s.io # RBAC API group
