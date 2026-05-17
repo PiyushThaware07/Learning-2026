@@ -1,0 +1,8 @@
+releases:
+  - name: nodejs-app-release
+    chart: ./nodejs-app
+    installed: true
+  
+  - name: helloworld-release
+    chart: ./helloworld
+    installed: true

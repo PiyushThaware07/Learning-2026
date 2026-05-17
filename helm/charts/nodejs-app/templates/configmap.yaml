@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "nodejs-app.fullname" . }}-config
+
+data:
+  PORT: {{ .Values.config.PORT | quote }}
+  APP_ENV: {{ .Values.config.APP_ENV | quote }}
+  APP_DEBUG: {{ .Values.config.APP_DEBUG | quote }}
