@@ -1,0 +1,8 @@
+releases:
+  - name: todo-client-release
+    namespace: dev-ns
+    chart: ./todo-client
+
+  - name: todo-server-release
+    namespace: dev-ns
+    chart: ./todo-server
