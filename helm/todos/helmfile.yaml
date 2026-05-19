@@ -1,0 +1,8 @@
+releases:
+  - name: todo-client-release
+    namespace: dev-ns
+    chart: git::https://github.com/PiyushThaware07/project-todos.git@/todo-client/.helm?ref=main
+
+  - name: todo-server-release
+    namespace: dev-ns
+    chart: git::https://github.com/PiyushThaware07/project-todos.git@/todo-server/.helm?ref=main
