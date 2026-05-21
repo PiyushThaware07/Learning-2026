@@ -1,0 +1,34 @@
+# Playbook to install packages
+- name: Install Packages
+  hosts: servers
+  become: yes
+
+  # List of packages to install
+  vars:
+    packages_to_install:
+      - nginx
+      - docker.io
+      - jq
+      - wget
+      - curl
+      - git
+      - unzip
+      - vim
+      - net-tools
+      - htop
+
+  tasks:
+
+    # Print package name before installation
+    - name: Print package name
+      debug:
+        msg: "Installing package: {{ item }}"
+      loop: "{{ packages_to_install }}"
+
+    # Install packages only on Debian/Ubuntu systems
+    - name: Install Package
+      package:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ packages_to_install }}"
+      when: ansible_os_family == "Redhat"

@@ -1,0 +1,28 @@
+# Playbook to install and start Nginx and Docker
+- name: Install Packages
+  hosts: servers
+  become: yes
+
+  tasks:
+
+    # Install Nginx web server and Docker
+    - name: Install Nginx and Docker
+      package:
+        name:
+          - nginx
+          - docker.io
+        state: present
+
+    # Start Nginx service and enable it on boot
+    - name: Start and enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    # Start Docker service and enable it on boot
+    - name: Start and enable Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes

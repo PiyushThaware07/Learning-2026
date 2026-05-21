@@ -1,0 +1,19 @@
+# Simple Ansible playbook example
+- name: My Playbook
+  hosts: servers
+  become: yes
+
+  # Variables used in the playbook
+  vars:
+    message: "Hello World"
+
+  tasks:
+
+    # Print the message variable
+    - name: Print Message Variable
+      command: echo "{{ message }}"
+
+    # Display the server IP address
+    - name: Print server IP
+      debug:
+        msg: "Server IP is {{ ansible_default_ipv4.address }}"
