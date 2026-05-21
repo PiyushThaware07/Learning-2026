@@ -1,0 +1,55 @@
+# SPDX-License-Identifier: MIT-0
+---
+# Tasks file for roles/docker
+
+# Update apt package cache
+- name: Update package cache
+  apt:
+    update_cache: yes
+
+# Upgrade all installed packages
+- name: Upgrade system packages
+  apt:
+    upgrade: dist
+
+# Install Docker package
+- name: Install Docker
+  apt:
+    name: docker.io
+    state: present
+
+# Start Docker service
+- name: Start Docker service
+  service:
+    name: docker
+    state: started
+
+# Enable Docker service on boot
+- name: Enable Docker service
+  service:
+    name: docker
+    enabled: yes
+
+# Add users to docker group
+- name: Add users to docker group
+  user:
+    name: "{{ item }}"
+    groups: docker
+    append: yes
+  loop: "{{ docker_users }}"
+
+# Restart Docker service
+- name: Restart Docker
+  service:
+    name: docker
+    state: restarted
+
+# Print Docker version
+- name: Print Docker version
+  command: docker --version
+  register: docker_version
+
+# Display Docker version output
+- name: Show Docker version
+  debug:
+    msg: "{{ docker_version.stdout }}"
