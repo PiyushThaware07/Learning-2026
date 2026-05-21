@@ -1,0 +1,34 @@
+# Playbook to configure Nginx with a custom HTML page
+- name: Setup Nginx With Custom HTML File
+  hosts: servers
+  become: yes
+
+  tasks:
+
+    # Install Nginx package
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    # Copy custom index.html file to Nginx web directory
+    - name: Copy Custom HTML File
+      copy:
+        src: index.html
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: '0644'
+
+    # Restart Nginx service
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
+
+    # Enable Nginx service on system boot
+    - name: Enable Nginx
+      service:
+        name: nginx
+        enabled: yes
