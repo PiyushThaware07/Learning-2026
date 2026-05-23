@@ -1,0 +1,19 @@
+---
+- name: Wait for SSH Connection
+  hosts: servers
+  gather_facts: no
+
+  tasks:
+    - name: Wait for SSH to come up
+      wait_for_connection:
+        timeout: 300
+
+
+- name: Install Docker and Nginx
+  hosts: servers
+  become: yes
+  gather_facts: yes
+
+  roles:
+    - docker
+    - nginx

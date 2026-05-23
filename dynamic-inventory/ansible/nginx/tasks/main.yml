@@ -1,0 +1,35 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for nginx
+
+# Ubuntu / Debian
+- name: Install Nginx on Ubuntu/Debian
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+  when: ansible_facts['os_family'] == "Debian"
+
+# Amazon Linux / RedHat / CentOS
+- name: Install Nginx on RedHat family
+  yum:
+    name: nginx
+    state: present
+  when: ansible_facts['os_family'] == "RedHat"
+
+# Start Nginx service
+- name: Start Nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+# Ensure Nginx is running
+- name: Check Nginx status
+  command: systemctl is-active nginx
+  register: nginx_status
+  changed_when: false
+
+- name: Show Nginx status
+  debug:
+    msg: "Nginx is {{ nginx_status.stdout }}"
