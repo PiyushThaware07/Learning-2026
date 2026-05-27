@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+
+metadata:
+  name: frontend-project
+  namespace: argocd
+
+spec:
+  description: This project holds frontend applications
+
+  sourceRepos:
+    - 'https://github.com/LondheShubham153/argocd-demos.git'
+
+  destinations:
+    - namespace: frontend
+      server: https://172.31.7.77:33893
+
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  orphanedResources:
+    warn: true
+
+  roles:
+    - name: frontend-team
+      description: Developer access for frontend project
+
+      policies:
+        - p, proj:frontend-project:frontend-team, applications, get, frontend-project/*, allow
+        - p, proj:frontend-project:frontend-team, applications, sync, frontend-project/*, allow
+        - p, proj:frontend-project:frontend-team, applications, create, frontend-project/*, allow
+        - p, proj:frontend-project:frontend-team, applications, update, frontend-project/*, allow
+        - p, proj:frontend-project:frontend-team, applications, delete, frontend-project/*, allow
+
+      groups:
+        - frontend-devs
+
+    - name: readonly
+      description: Read only access
+
+      policies:
+        - p, proj:frontend-project:readonly, applications, get, frontend-project/*, allow
+
+      groups:
+        - frontend-viewers

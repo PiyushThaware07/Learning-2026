@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+
+metadata:
+  name: apache-app
+  namespace: argocd
+
+spec:
+  project: frontend-project
+
+  source:
+    repoURL: https://github.com/PiyushThaware07/learning-2026
+    targetRevision: argocd
+    path: demo_apps/nginx
+
+  destination:
+    server: https://172.31.7.77:33893
+    namespace: frontend
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+    syncOptions:
+      - CreateNamespace=true
