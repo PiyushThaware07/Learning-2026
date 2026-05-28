@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1  # Argo CD Application CRD API version
+kind: Application                  # Resource type is Argo CD Application
+
+metadata:
+  name: node-app                 # Name of the Argo CD application
+  namespace: argocd               # MUST be in argocd namespace where Argo CD runs
+
+spec:
+  project: default                # Argo CD project (default is fine for learning)
+
+  source:
+    repoURL: https://github.com/PiyushThaware07/learning-2026  # Git repo containing manifests
+    targetRevision: argocd-2.0    # Git branch / tag / commit (must exist in repo)
+    path: demo-apps/node-app         # Path inside repo where Kubernetes manifests live
+
+  destination:
+    server: https://kubernetes.default.svc  #= in-cluster API server
+                                              # (your 172.31.x.x endpoint is incorrect for Argo CD)
+    namespace: node-app-ns                      # Target namespace where app will be deployed
+
+  syncPolicy:
+    automated:
+      prune: true       # Deletes resources removed from Git
+      selfHeal: true    # Reverts manual cluster changes back to Git state
+    syncOptions:
+      - CreateNamespace=true  # auto-create namespace if it doesn't exist
