@@ -1,0 +1,76 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+
+metadata:
+  name: flowbit-project
+  namespace: argocd
+
+spec:
+  description: This project holds Flowbit applications
+
+  sourceRepos:
+    - 'https://github.com/PiyushThaware07/learning-2026'
+
+  destinations:
+    - namespace: flowbit-dev
+      server: https://kubernetes.default.svc
+
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  orphanedResources:
+    warn: true
+
+  roles:
+    # ---------------- DEV TEAM ----------------
+    - name: flowbit-dev-team
+      description: Developer access for Flowbit project
+
+      policies:
+        - p, proj:flowbit-project:flowbit-dev-team, applications, get, flowbit-project/*, allow
+        - p, proj:flowbit-project:flowbit-dev-team, applications, sync, flowbit-project/*, allow
+        - p, proj:flowbit-project:flowbit-dev-team, applications, create, flowbit-project/*, allow
+        - p, proj:flowbit-project:flowbit-dev-team, applications, update, flowbit-project/*, allow
+        - p, proj:flowbit-project:flowbit-dev-team, applications, delete, flowbit-project/*, allow
+
+      groups:
+        - flowbit-devs
+
+    # ---------------- SQA / QA TEAM ----------------
+    - name: flowbit-sqa-team
+      description: QA / SQA team access (validate & sync only)
+
+      policies:
+        - p, proj:flowbit-project:flowbit-sqa-team, applications, get, flowbit-project/*, allow
+        - p, proj:flowbit-project:flowbit-sqa-team, applications, sync, flowbit-project/*, allow
+        - p, proj:flowbit-project:flowbit-sqa-team, applications, action/*, flowbit-project/*, allow
+
+      groups:
+        - flowbit-sqa
+
+    # ---------------- SME TEAM ----------------
+    - name: flowbit-sme-team
+      description: SME access (read + troubleshooting + sync approval support)
+
+      policies:
+        - p, proj:flowbit-project:flowbit-sme-team, applications, get, flowbit-project/*, allow
+        - p, proj:flowbit-project:flowbit-sme-team, applications, sync, flowbit-project/*, allow
+        - p, proj:flowbit-project:flowbit-sme-team, applications, override, flowbit-project/*, allow
+
+      groups:
+        - flowbit-sme
+
+    # ---------------- READ ONLY ----------------
+    - name: readonly
+      description: Read only access
+
+      policies:
+        - p, proj:flowbit-project:readonly, applications, get, flowbit-project/*, allow
+
+      groups:
+        - flowbit-viewers
