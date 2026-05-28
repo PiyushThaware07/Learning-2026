@@ -1,0 +1,15 @@
+# Kind Cluster Configuration for EC2
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+
+networking:
+ # EC2 Private IP where Kubernetes API will bind
+ apiServerAddress: "172.31.11.173"
+
+ # Port exposed for kubectl / ArgoCD access
+ apiServerPort: 33894
+
+nodes:
+ # Control Plane Node
+ - role: control-plane
+   image: kindest/node:v1.33.1
