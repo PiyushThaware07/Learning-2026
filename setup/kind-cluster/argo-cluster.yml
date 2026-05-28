@@ -2,7 +2,7 @@ kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 
 networking:
-  apiServerAddress: "172.31.16.21"   # Change to your EC2 private IP
+  apiServerAddress: "172.31.20.194"   # Change to your EC2 private IP
   apiServerPort: 33893
 
 nodes:
