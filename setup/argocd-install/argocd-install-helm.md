@@ -60,7 +60,7 @@ EOF
 # =========================================================
 # 6. Create Kubernetes Cluster
 # =========================================================
-kind create cluster --name argocd-cluster --config cluster.yaml
+kind create cluster --name argocd-cluster --config argo-cluster.yml
 kubectl cluster-info
 kubectl get nodes
 
